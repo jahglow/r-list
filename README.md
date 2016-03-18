@@ -1,56 +1,44 @@
 # r-list
+An element to wrap around Reportal WYSIWYG List element to restyle its contents according to Material Design spec.
+One doesn't need to provide type of the list element, because it's calculated automatically.
+These are Polymer polyfills which hide original Reportal markup and reflect entered data into respective Reportal forms.
+The multiselect list is a dropdown with checkboxes on the side to denote selected options.
 
-An element providing a starting point for your own reusable Polymer elements.
+Example:
 
+```html
+    <r-list label="Some title">
+      <confirmit:wysiwygcomponent type="ReportalDropDown" id="39860b07-abd2-4972-b62f-d0d00900fb63" />
+    </r-list>
+```    
 
-## Dependencies
+You may OPTIONALLY specify a label text that will show above the list component.
+It can be done via attribute label="Some text label" on <r-list> tag or via a span inside tag's content (see initialisation example above).
+The latter is useful when building multilingual report and one needs to pass the title via Language Text element.
 
-Element dependencies are managed via [Bower](http://bower.io/). You can
-install that via:
+Example:
 
-    npm install -g bower
-
-Then, go ahead and download the element's dependencies:
-
-    bower install
-
-
-## Playing With Your Element
-
-If you wish to work on your element in isolation, we recommend that you use
-[Polyserve](https://github.com/PolymerLabs/polyserve) to keep your element's
-bower dependencies in line. You can install it via:
-
-    npm install -g polyserve
-
-And you can run it via:
-
-    polyserve
-
-Once running, you can preview your element at
-`http://localhost:8080/components/r-list/`, where `r-list` is the name of the directory containing it.
+```html
+    <r-list>
+      <span id="label">Some title</span>
+      <confirmit:wysiwygcomponent type="ReportalDropDown" id="39860b07-abd2-4972-b62f-d0d00900fb63" />
+    </r-list>
+```
 
 
-## Testing Your Element
+### Styling
 
-Simply navigate to the `/test` directory of your element to run its tests. If
-you are using Polyserve: `http://localhost:8080/components/r-list/test/`
+The following custom properties and mixins are also available for styling:
 
-### web-component-tester
+Custom property | Description | Default
+----------------|-------------|----------
+`--r-list` | A mixin that is applied to the element host | `{}`
+`--r-list-checkbox` | A mixin that is applied to the checkbox | `{}`
+`--r-list-radio-group` | A mixin that is applied to the  radio group | `{}`
+`--r-list-radio-button` | A mixin that is applied to the radio button | `{}`
+`--r-list-label` | A mixin that is applied to the Custom label | `{}`
+`--r-list-dropdown` | A mixin that is applied to the the dropdown | `{}`
 
-The tests are compatible with [web-component-tester](https://github.com/Polymer/web-component-tester).
-Install it via:
-
-    npm install -g web-component-tester
-
-Then, you can run your tests on _all_ of your local browsers via:
-
-    wct
-
-#### WCT Tips
-
-`wct -l chrome` will only run tests in chrome.
-
-`wct -p` will keep the browsers alive after test runs (refresh to re-run).
-
-`wct test/some-file.html` will test only the files you specify.
+You can also use any of the `paper-input-container` and `paper-menu-button`
+style mixins and custom properties to style the internal input and menu button
+respectively.
