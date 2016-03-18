@@ -1,0 +1,218 @@
+<!doctype html>
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<html>
+<head>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+  <title>r-dropdown demo</title>
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+  <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+  <link rel="import" href="../../paper-button/paper-button.html">
+  <link rel="import" href="../../paper-item/paper-icon-item.html">
+  <link rel="import" href="../../paper-item/paper-item.html">
+  <link rel="import" href="../../paper-listbox/paper-listbox.html">
+  <link rel="import" href="../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../paper-tabs/paper-tabs.html">
+  <link rel="import" href="../r-dropdown.html">
+
+  <style is="custom-style" include="demo-pages-shared-styles">
+    paper-tabs {
+      width: 400px;
+    }
+
+    .vertical-section-container {
+      max-width: 500px;
+    }
+
+    r-dropdown {
+      width: 200px;
+    }
+  </style>
+
+</head>
+<body unresolved>
+<div class="vertical-section-container centered">
+  <h4>This is a multi-selectable r-dropdown with 3 options preselected using the <i>selected-values</i> attribute </h4>
+  <demo-snippet class="centered-demo">
+    <template>
+      <r-dropdown label="Dinosaurs" multi vertical-offset="48" multi-threshold-label="values">
+        <paper-listbox class="dropdown-content" multi selected-attribute="selected" multi selected-values="[2,0,3]">
+          <paper-icon-item><iron-icon icon="check" item-icon></iron-icon>allosaurus</paper-icon-item>
+          <paper-icon-item><iron-icon icon="check" item-icon></iron-icon>brontosaurus</paper-icon-item>
+          <paper-icon-item><iron-icon icon="check" item-icon></iron-icon>carcharodontosaurus</paper-icon-item>
+          <paper-icon-item><iron-icon icon="check" item-icon></iron-icon>diplodocus</paper-icon-item>
+        </paper-listbox>
+      </r-dropdown>
+    </template>
+  </demo-snippet>
+
+  <h4>You can pre-select a value using the <i>selected</i> attribute</h4>
+  <demo-snippet class="centered-demo">
+    <template>
+      <r-dropdown label="Dinosaurs" readonly>
+        <paper-listbox class="dropdown-content" selected="1">
+          <paper-item>allosaurus</paper-item>
+          <paper-item>brontosaurus</paper-item>
+          <paper-item>carcharodontosaurus</paper-item>
+          <paper-item>diplodocus</paper-item>
+        </paper-listbox>
+      </r-dropdown>
+    </template>
+  </demo-snippet>
+
+  <h4>You can change the direction in which the menu opens</h4>
+  <demo-snippet class="centered-demo">
+    <template>
+      <r-dropdown label="Upwards and to the left!" vertical-align="bottom" horizontal-align="left">
+        <paper-listbox class="dropdown-content">
+          <paper-item>allosaurus</paper-item>
+          <paper-item>brontosaurus</paper-item>
+          <paper-item>carcharodontosaurus</paper-item>
+          <paper-item>diplodocus</paper-item>
+        </paper-listbox>
+      </r-dropdown>
+    </template>
+  </demo-snippet>
+
+
+  <h4>A r-dropdown can be disabled</h4>
+  <demo-snippet class="centered-demo">
+    <template>
+      <r-dropdown label="Disabled dinosaurs" disabled>
+        <paper-listbox class="dropdown-content">
+          <paper-item>allosaurus</paper-item>
+          <paper-item>brontosaurus</paper-item>
+          <paper-item>carcharodontosaurus</paper-item>
+          <paper-item>diplodocus</paper-item>
+        </paper-listbox>
+      </r-dropdown>
+    </template>
+  </demo-snippet>
+
+  <!-- TODO(noms): enable this demo when the webcomponentsjs bug is fixed -->
+  <!-- <h4>Here is an example of a long, scrolling menu, using a <i>dom-repeat</i></h4>
+  <demo-snippet class="centered-demo">
+    <template>
+      <template is="dom-bind" id="Demo">
+        <r-dropdown label="Dinosaurs">
+          <paper-listbox class="dropdown-content">
+            <template is="dom-repeat" items='[[dinosaurs]]' as="dinosaur">
+              <paper-icon-item>[[dinosaur]]</paper-item>
+            </template>
+          </paper-listbox>
+        </r-dropdown>
+      </template>
+    </template>
+  </demo-snippet> -->
+
+  <h4>A r-dropdown can contain any kind of content, such as tabs</h4>
+  <demo-snippet class="centered-demo">
+    <template>
+      <r-dropdown label="Menu tabs!?">
+        <paper-tabs class="dropdown-content">
+          <paper-tab>cheddar</paper-tab>
+          <paper-tab>stilton</paper-tab>
+          <paper-tab>emmental</paper-tab>
+        </paper-tabs>
+      </r-dropdown>
+    </template>
+  </demo-snippet>
+
+  <h4>You can remove the ripple and the animations</h4>
+  <demo-snippet class="centered-demo">
+    <template>
+      <r-dropdown label="Dinosaurs" noink no-animations>
+        <paper-listbox class="dropdown-content">
+          <paper-item>allosaurus</paper-item>
+          <paper-item>brontosaurus</paper-item>
+          <paper-item>carcharodontosaurus</paper-item>
+          <paper-item>diplodocus</paper-item>
+        </paper-listbox>
+      </r-dropdown>
+    </template>
+  </demo-snippet>
+
+  <h4>You can style a r-dropdown using custom properties</h4>
+  <demo-snippet class="centered-demo">
+    <template>
+      <style is="custom-style">
+        r-dropdown.custom {
+          --paper-input-container-label: {
+            color: white;
+            background-color: var(--paper-pink-500);
+            font-style: italic;
+            text-align: center;
+            font-weight: bold;
+          };
+          --paper-input-container-input: {
+            color: var(--paper-indigo-500);
+            font-style: normal;
+            font-family: serif;
+            text-transform: uppercase;
+          }
+          /* no underline */
+          --paper-input-container-underline: {
+            display: none;
+          };
+        }
+      </style>
+      <r-dropdown class="custom" label="Custom" no-label-float>
+        <paper-listbox class="dropdown-content">
+          <paper-item>allosaurus</paper-item>
+          <paper-item>brontosaurus</paper-item>
+          <paper-item>carcharodontosaurus</paper-item>
+          <paper-item>diplodocus</paper-item>
+        </paper-listbox>
+      </r-dropdown>
+    </template>
+  </demo-snippet>
+</div>
+
+<script>
+  document.addEventListener('WebComponentsReady', function() {
+    Demo.dinosaurs = [
+      'allosaurus',
+      'brontosaurus',
+      'carcharodontosaurus',
+      'diplodocus',
+      'ekrixinatosaurus',
+      'fukuiraptor',
+      'gallimimus',
+      'hadrosaurus',
+      'iguanodon',
+      'jainosaurus',
+      'kritosaurus',
+      'liaoceratops',
+      'megalosaurus',
+      'nemegtosaurus',
+      'ornithomimus',
+      'protoceratops',
+      'quetecsaurus',
+      'rajasaurus',
+      'stegosaurus',
+      'triceratops',
+      'utahraptor',
+      'vulcanodon',
+      'wannanosaurus',
+      'xenoceratops',
+      'yandusaurus',
+      'zephyrosaurus'
+    ];
+  });
+</script>
+</body>
+</html>

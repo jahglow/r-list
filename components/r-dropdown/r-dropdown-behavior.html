@@ -1,0 +1,207 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-a11y-keys-behavior/iron-a11y-keys-behavior.html">
+<link rel="import" href="../iron-form-element-behavior/iron-form-element-behavior.html">
+<link rel="import" href="../iron-validatable-behavior/iron-validatable-behavior.html">
+<link rel="import" href="../iron-behaviors/iron-control-state.html">
+<link rel="import" href="../iron-behaviors/iron-button-state.html">
+
+<script>
+
+  var Confirmit=Confirmit||{};
+
+  /** @polymerBehavior Confirmit.RDropdownBehavior */
+
+  Confirmit.RDropdownBehaviorImpl = {
+    is: 'r-dropdown',
+
+    /**
+     * Fired when the dropdown opens.
+     *
+     * @event paper-dropdown-open
+     */
+
+    /**
+     * Fired when the dropdown closes.
+     *
+     * @event paper-dropdown-close
+     */
+
+
+    properties: {
+
+      /**
+       * The label for the dropdown.
+       */
+      label: {
+        type: String
+      },
+
+      /**
+       * The placeholder for the dropdown.
+       */
+      placeholder: {
+        type: String
+      },
+
+      /**
+       * The error message to display when invalid.
+       */
+      errorMessage: {
+        type: String
+      },
+
+      /**
+       * True if the dropdown is open. Otherwise, false.
+       */
+      opened: {
+        type: Boolean,
+        notify: true,
+        value: false,
+        observer: '_openedChanged'
+      },
+
+      /**
+       * Set to true to disable the floating label. Bind this to the
+       * `<paper-input-container>`'s `noLabelFloat` property.
+       */
+      noLabelFloat: {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true
+      },
+
+      /**
+       * Set to true to always float the label. Bind this to the
+       * `<paper-input-container>`'s `alwaysFloatLabel` property.
+       */
+      alwaysFloatLabel: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * Set to true to disable animations when opening and closing the
+       * dropdown.
+       */
+      noAnimations: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * The orientation against which to align the menu dropdown
+       * horizontally relative to the dropdown trigger.
+       */
+      horizontalAlign: {
+        type: String,
+        value: 'right'
+      },
+
+      /**
+       * The orientation against which to align the menu dropdown
+       * vertically relative to the dropdown trigger.
+       */
+      verticalAlign: {
+        type: String,
+        value: 'top'
+      },
+      /**
+       * Set to true if the dropdown has multiple select option
+       */
+      multi: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * how many comma-separated labels of selected items to show in the input if multiple options can be selected
+       * */
+      multiThreshold: {
+        type: Number,
+        value: 2
+      },
+      /**
+       * Text after digit denoting number of selected options above `multiThreshold`,
+       * i.e. if `multiThresholdLabel` is "items" and there are 3 selected options (with `multiThreshold`=2)
+       * the label in the input will read "3 items" instead of "Item #1, Item #2, Item #3"
+       * */
+      multiThresholdLabel: {
+        type: String,
+        value: 'items'
+      },
+      /**
+       * specify to offset the dropdown content from dropdown-trigger, useful for multiselect dropdowns
+       * */
+      verticalOffset: {
+        type: Number,
+        value: 0
+      }
+
+    },
+
+    keyBindings: {
+      'esc': 'close',
+      'up': 'selectPrevious',
+      'down': 'selectNext'
+    },
+
+    hostAttributes: {
+      role: 'combobox',
+      'aria-autocomplete': 'none',
+      'aria-haspopup': 'true'
+    },
+    /**
+     * Compute the vertical offset of the menu based on the value of
+     * `noLabelFloat`.
+     *
+     * @param {boolean} noLabelFloat True if the label should not float
+     * above the input, otherwise false.
+     */
+    _computeMenuVerticalOffset: function (noLabelFloat, verticalOffset) {
+      // NOTE(cdata): These numbers are somewhat magical because they are
+      // derived from the metrics of elements internal to `paper-input`'s
+      // template. The metrics will change depending on whether or not the
+      // input has a floating label.
+      return noLabelFloat ? verticalOffset - 4 : verticalOffset + 8;
+    },
+
+    /**
+     * Returns false if the element is required and does not have a selection,
+     * and true otherwise.
+     * @param {*=} _value Ignored.
+     * @return {boolean} true if `required` is false, or if `required` is true
+     * and the element has a valid selection.
+     */
+    _getValidity: function (_value) {
+      return this.disabled || !this.required || (this.required && !!this.value);
+    },
+
+    _openedChanged: function () {
+      var openState = this.opened ? 'true' : 'false';
+      var e = this.contentElement;
+      if (e) {
+        e.setAttribute('aria-expanded', openState);
+      }
+
+    }
+  };
+
+  /** @polymerBehavior */
+  Confirmit.RDropdownBehavior = [
+    Polymer.IronButtonState,
+    Polymer.IronControlState,
+    Polymer.IronFormElementBehavior,
+    Polymer.IronValidatableBehavior,
+    Confirmit.RDropdownBehaviorImpl
+  ];
+
+
+</script>

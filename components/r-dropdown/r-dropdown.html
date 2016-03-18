@@ -1,0 +1,372 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-styles/default-theme.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-item/paper-icon-item.html">
+<link rel="import" href="../paper-listbox/paper-listbox.html">
+<link rel="import" href="../paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../paper-ripple/paper-ripple.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="r-dropdown-behavior.html">
+
+<!--
+Material design: [Dropdown menus](https://www.google.com/design/spec/components/buttons.html#buttons-dropdown-buttons)
+
+`r-dropdown` is similar to a native browser select element.
+`r-dropdown` works with selectable content. The currently selected
+item is displayed in the control. If no item is selected, the `label` is
+displayed instead.
+
+Besides common functionality of `paper-dropdown-menu` r-dropdown can be multiselectable (if `multi` is passed to the `r-dropdown` and `paper-listbox`)
+ and display all selected labels in the control as a comma-separated list. There is an option to replace the list of labels with a custom title, e.g. "3 items".
+ The dropdown stays open (doesn't close on iron-selected) if it's `multi`.
+
+The child element with the class `dropdown-content` will be used as the dropdown
+menu. It could be a `paper-menu` or element that triggers `iron-select` when
+selecting its children.
+
+Example:
+
+    <r-dropdown label="Your favourite pastry">
+      <paper-listbox class="dropdown-content">
+        <paper-item>Croissant</paper-item>
+        <paper-item>Donut</paper-item>
+        <paper-item>Financier</paper-item>
+        <paper-item>Madeleine</paper-item>
+      </paper-listbox>
+    </r-dropdown>
+
+This example renders a dropdown menu with 4 options.
+
+Similarly to using `iron-select`, `iron-deselect` events will cause the
+current selection of the `r-dropdown` to be cleared.
+
+### Styling
+
+The following custom properties and mixins are also available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--r-dropdown` | A mixin that is applied to the element host | `{}`
+`--r-dropdown-disabled` | A mixin that is applied to the element host when disabled | `{}`
+`--r-dropdown-ripple` | A mixin that is applied to the internal ripple | `{}`
+`--r-dropdown-button` | A mixin that is applied to the internal menu button | `{}`
+`--r-dropdown-input` | A mixin that is applied to the internal paper input | `{}`
+`--r-dropdown-icon` | A mixin that is applied to the internal icon | `{}`
+
+You can also use any of the `paper-input-container` and `paper-menu-button`
+style mixins and custom properties to style the internal input and menu button
+respectively.
+
+@group Reportal Elements
+@element r-dropdown
+@demo demo/index.html
+-->
+
+<dom-module id="r-dropdown">
+  <template>
+    <style>
+      :host {
+        display: inline-block;
+        position: relative;
+        text-align: left;
+        cursor: pointer;
+
+        /* NOTE(cdata): Both values are needed, since some phones require the
+         * value to be `transparent`.
+         */
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        -webkit-tap-highlight-color: transparent;
+
+        --paper-input-container-input: {
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          max-width: 100%;
+          box-sizing: border-box;
+          cursor: pointer;
+        };
+
+        @apply(--r-dropdown);
+      }
+
+      :host([disabled]) {
+        @apply(--r-dropdown-disabled);
+      }
+
+      :host([noink]) paper-ripple {
+        display: none;
+      }
+
+      :host([no-label-float]) paper-ripple {
+        top: 8px;
+      }
+
+      paper-ripple {
+        top: 12px;
+        left: 0px;
+        bottom: 8px;
+        right: 0px;
+
+        @apply(--r-dropdown-ripple);
+      }
+
+      paper-menu-button {
+        display: block;
+        padding: 0;
+
+        @apply(--r-dropdown-button);
+      }
+
+      paper-input {
+        @apply(--r-dropdown-input);
+      }
+
+      iron-icon {
+        color: var(--disabled-text-color);
+        @apply(--r-dropdown-icon);
+      }
+      :host paper-listbox paper-icon-item, :host ::content paper-listbox paper-icon-item{--paper-item-icon-width:0px}
+      :host paper-listbox[multi] paper-icon-item iron-icon, :host ::content paper-listbox[multi] paper-icon-item iron-icon{visibility:hidden}
+      :host paper-listbox[multi] paper-icon-item, :host ::content paper-listbox[multi] paper-icon-item{--paper-item-icon-width:56px}
+      :host paper-listbox[multi] paper-icon-item[selected] iron-icon, :host ::content paper-listbox[multi] paper-icon-item[selected] iron-icon{visibility:visible}
+    </style>
+
+    <!-- this div fulfills an a11y requirement for combobox, do not remove -->
+    <div role="button"></div>
+    <!-- paper-input has type="text" for a11y, do not remove -->
+    <paper-menu-button
+            id="menuButton"
+            vertical-align="[[verticalAlign]]"
+            horizontal-align="[[horizontalAlign]]"
+            vertical-offset="[[_computeMenuVerticalOffset(noLabelFloat,verticalOffset)]]"
+            disabled="[[disabled]]"
+            no-animations="[[noAnimations]]"
+            on-iron-select="_onIronSelect"
+            on-iron-deselect="_onIronDeselect"
+            ignore-select="[[multi]]"
+            opened="{{opened}}" >
+      <div class="dropdown-trigger">
+        <paper-ripple hidden="[[noink]]"></paper-ripple>
+      <paper-input id="input"
+            type="text"
+            invalid="[[invalid]]"
+            readonly
+            disabled="[[disabled]]"
+            value="[[selectedItemLabel]]"
+            placeholder="[[placeholder]]"
+            error-message="[[errorMessage]]"
+            always-float-label="[[alwaysFloatLabel]]"
+            no-label-float="[[noLabelFloat]]"
+            label="[[label]]">
+
+        <iron-icon icon="arrow-drop-down" suffix></iron-icon>
+    </paper-input>
+      </div>
+      <content id="content" select=".dropdown-content"></content>
+    </paper-menu-button>
+
+
+
+
+  </template>
+</dom-module>
+
+<script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'r-dropdown',
+
+      /**
+       * Fired when the dropdown opens.
+       *
+       * @event paper-dropdown-open
+       */
+
+      /**
+       * Fired when the dropdown closes.
+       *
+       * @event paper-dropdown-close
+       */
+
+      behaviors: [
+        Confirmit.RDropdownBehavior
+      ],
+      properties:{
+        /**
+         * The derived "label" of the currently selected item. This value
+         * is the `label` property on the selected item if set, or else the
+         * trimmed text content of the selected item.
+         */
+        selectedItemLabel: {
+          type: String,
+          notify: true,
+          readOnly: true
+        },
+
+        /**
+         * The last selected item. An item is selected if the dropdown menu has
+         * a child with class `dropdown-content`, and that child triggers an
+         * `iron-select` event with the selected `item` in the `detail`.
+         *
+         * @type {?Object}
+         */
+        selectedItem: {
+          type: Object,
+          notify: true,
+          readOnly: true
+        },
+        /**
+         * The array of currently selected items. An item is selected if the dropdown menu has
+         * a child with class `dropdown-content`, and that child triggers an
+         * `iron-select` event with the selected `item` in the `detail`.
+         * @type {?Array}
+         */
+        selectedItems: {
+          type: Array,
+          value: [],
+          notify: true
+        },
+
+        /**
+         * The value for this element that will be used when submitting in
+         * a form. It is read only, and will always have the same value
+         * as `selectedItemLabel`.
+         */
+        value: {
+          type: String,
+          notify: true,
+          readOnly: true
+        }
+
+      },
+
+      listeners: {
+        'tap': '_onTap'
+      },
+
+      observers: [
+        '_selectedItemChanged(selectedItem)',
+        '_selectedItemsChanged(selectedItems.splices,multiThreshold,multiThresholdLabel)'
+      ],
+
+      attached: function() {
+
+        var input = this.querySelector('paper-input');
+        // NOTE(cdata): Due to timing, a preselected value in a `IronSelectable`
+        // child will cause an `iron-select` event to fire while the element is
+        // still in a `DocumentFragment`. This has the effect of causing
+        // handlers not to fire. So, we double check this value on attached:
+        var contentElement = this.contentElement;
+        if (contentElement && contentElement.selectedItem) {
+          this._setSelectedItem(contentElement.selectedItem);
+        }
+      },
+
+      /**
+       * The content element that is contained by the dropdown menu, if any.
+       */
+      get contentElement() {
+        return Polymer.dom(this.$.content).getDistributedNodes()[0];
+      },
+
+      /**
+       * Show the dropdown content.
+       */
+      open: function() {
+        this.$.menuButton.open();
+      },
+
+      /**
+       * Hide the dropdown content.
+       */
+      close: function() {
+        this.$.menuButton.close();
+      },
+      /**
+       * A handler that is called when `iron-select` is fired.
+       *
+       * @param {CustomEvent} event An `iron-select` event.
+       */
+      _onIronSelect: function(event) {
+        if(this.multi && this.selectedItems.indexOf(event.detail.item)<0){
+          this.push('selectedItems',event.detail.item)
+        }
+        this._setSelectedItem(event.detail.item);
+      },
+
+      /**
+       * A handler that is called when `iron-deselect` is fired.
+       *
+       * @param {CustomEvent} event An `iron-deselect` event.
+       */
+      _onIronDeselect: function(event) {
+        this._setSelectedItem(null);
+        if(this.multi && this.selectedItems.length>0 && this.selectedItems.indexOf(event.detail.item)!==-1){
+          this.splice('selectedItems',this.selectedItems.indexOf(event.detail.item),1);
+        }
+      },
+
+      /**
+       * A handler that is called when the dropdown is tapped.
+       *
+       * @param {CustomEvent} event A tap event.
+       */
+      _onTap: function(event) {
+        if (Polymer.Gestures.findOriginalTarget(event) === this) {
+          this.open();
+        }
+      },
+      /**
+       * Compute the label for the dropdown given a selected item.
+       *
+       * @param {Element} selectedItem A selected Element item, with an
+       * optional `label` property.
+       */
+      _selectedItemChanged: function (selectedItem) {
+        var value = '';
+        if (!this.multi) {
+          if (!selectedItem) {
+            value = '';
+          } else {
+            value = selectedItem.label || selectedItem.textContent.trim();
+          }
+          this._setValue(value);
+          this._setSelectedItemLabel(value);
+        }
+      },
+      /**
+       * Compute the label for the dropdown given an array of selected items.
+       *
+       * @param {!Object} selectedItems A splice of selected elements
+       */
+      _selectedItemsChanged: function (selectedItems, multiThreshold, multiThresholdLabel) {
+        var value = '';
+        if (this.multi) {
+          if (this.selectedItems.length === 0) {
+            value = '';
+          } else if (this.selectedItems.length <= multiThreshold) {
+            value = this.selectedItems.map(function (item) {
+              return item.label ? item.label : item.textContent.trim()
+            }).join(', ');
+          } else {
+            value = this.selectedItems.length + ' ' + multiThresholdLabel
+          }
+        }
+        this._setValue(value);
+        this._setSelectedItemLabel(value);
+      }
+    });
+  })();
+</script>

@@ -1,0 +1,347 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-styles/default-theme.html">
+<link rel="import" href="../r-dropdown/r-dropdown.html">
+<link rel="import" href="../paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../paper-radio-button/paper-radio-button.html">
+<link rel="import" href="../paper-radio-group/paper-radio-group.html">
+<link rel="import" href="../paper-listbox/paper-listbox.html">
+<link rel="import" href="../paper-item/paper-icon-item.html">
+
+
+<!--
+An element to wrap around Reportal WYSIWYG List element to restyle its contents according to Material Design spec.
+One doesn't need to provide type of the list element, because it's calculated automatically.
+These are Polymer polyfills which hide original Reportal markup and reflect entered data into respective Reportal forms.
+The multiselect list is a dropdown with checkboxes on the side to denote selected options.
+
+Example:
+
+    <r-list label="Some title">
+      <confirmit:wysiwygcomponent type="ReportalDropDown" id="39860b07-abd2-4972-b62f-d0d00900fb63" />
+    </r-list>
+
+You may OPTIONALLY specify a label text that will show above the list component.
+It can be done via attribute label="Some text label" on <r-list> tag or via a span inside tag's content (see initialisation example above).
+The latter is useful when building multilingual report and one needs to pass the title via Language Text element.
+
+Example:
+
+    <r-list>
+      <span id="label">Some title</span>
+      <confirmit:wysiwygcomponent type="ReportalDropDown" id="39860b07-abd2-4972-b62f-d0d00900fb63" />
+    </r-list>
+
+
+### Styling
+
+The following custom properties and mixins are also available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--r-list` | A mixin that is applied to the element host | `{}`
+`--r-list-checkbox` | A mixin that is applied to the checkbox | `{}`
+`--r-list-radio-group` | A mixin that is applied to the  radio group | `{}`
+`--r-list-radio-button` | A mixin that is applied to the radio button | `{}`
+`--r-list-label` | A mixin that is applied to the Custom label | `{}`
+`--r-list-dropdown` | A mixin that is applied to the the dropdown | `{}`
+
+You can also use any of the `paper-input-container` and `paper-menu-button`
+style mixins and custom properties to style the internal input and menu button
+respectively.
+
+@group Reportal Elements
+@element r-list
+@demo demo/index.html
+@hero hero.svg
+-->
+<dom-module id="r-list">
+  <template strip-whitespace>
+    <style>
+      :host {
+        display: inline-block;
+        @apply(--r-list);
+      }
+      :host paper-checkbox{
+        display: block;
+        padding: 8px 8px;
+        @apply(--r-list-checkbox);
+      }
+      :host paper-radio-group{
+        display: block;
+        @apply(--r-list-radio-group);
+      }
+      :host paper-radio-group paper-radio-button{
+        display: block;
+        padding: 8px 8px;
+        @apply(--r-list-radio-button);
+      }
+      :host #listWrapper{
+        display:none;
+      }
+      :host #wrapperLabel{
+        /*margin: 8px 8px 0 8px;*/
+        display: none;
+        position: relative;
+        font-weight: 500;
+        color: var(--default-primary-color);
+        font-size: 13px;
+        line-height: 24px;
+        text-transform: uppercase;
+        @apply(--r-list-label);
+      }
+      :host paper-listbox:not([multi]) paper-icon-item{--paper-item-icon-width:0px}
+      :host paper-listbox[multi] paper-icon-item iron-icon{visibility:hidden}
+      :host paper-listbox[multi] paper-icon-item[selected]{--paper-item-icon-width:56px}
+      :host paper-listbox[multi] paper-icon-item[selected] iron-icon{visibility:visible}
+      :host r-dropdown{
+        @apply(--r-list-dropdown);
+      }
+      /*:host paper-checkbox:first-child, :host paper-radio-group:first-child{padding-top: 32px}*/
+    </style>
+
+
+    <span id="wrapperLabel">
+      <content select="#label"></content>
+    </span>
+    <span id="listWrapper">
+      <content id="source"></content>
+    </span>
+
+    <template id="checkbox">
+      <div>
+        <template is="dom-repeat" items="[[data]]">
+          <paper-checkbox value="[[item.value]]" checked="[[item.checked]]">{{item.label}}</paper-checkbox>
+        </template>
+      </div>
+    </template>
+    <template id="radio">
+      <paper-radio-group attr-for-selected="value" selected$="{{selectedItem}}">
+        <template is="dom-repeat" items="[[data]]">
+          <paper-radio-button value="[[item.value]]" selected="[[item.checked]]">{{item.label}}</paper-radio-button>
+        </template>
+      </paper-radio-group>
+    </template>
+
+    <template id="dropdown">
+      <r-dropdown label$="[[label]]"
+                  vertical-align$="[[verticalAlign]]"
+                  horizontal-align$="[[horizontalAlign]]"
+                  no-label-float$="[[forceCustomLabel]]"
+                  no-animations$="[[noAnimations]]"
+                  always-float-label$="[[alwaysFloatLable]]"
+                  multi$="[[multi]]"
+                  multi-threshold$="[[multiThreshold]]"
+                  multi-threshold-label$="[[multiThresholdLabel]]"
+                  error-message$="[[errorMessage]]"
+                  placeholder$="[[placeholder]]"
+                  vertical-offset$="[[verticalOffset]]">
+        <paper-listbox class="dropdown-content"
+                       attr-for-selected="value"
+                       multi$="[[multi]]"
+                       selected="[[selectedItem]]"
+                       selected-values="[[selectedItems]]"
+                       selected-attribute="selected">
+          <template is="dom-repeat" items="[[data]]" as="item">
+            <paper-icon-item value$="[[item.value]]"><iron-icon icon="check" item-icon></iron-icon>{{item.label}}</paper-icon-item>
+          </template>
+        </paper-listbox>
+      </r-dropdown>
+    </template>
+
+  </template>
+
+</dom-module>
+
+<script>
+  'use strict';
+  Polymer({
+    is: 'r-list',
+    behaviors:[
+      Confirmit.RDropdownBehavior,
+      Polymer.Templatizer
+    ],
+
+    properties: {
+      /**
+       * autodetected type of the list
+       *
+       * */
+      _listType:String,
+      /**
+       * Computed data for the list
+       * @type {[{value:String, label:String, ?checked:Boolean, ?selected:Boolean}]}
+       * */
+      data:{
+        type:Array,
+        notify:true,
+        value:function(){return []},
+        readOnly:true
+      },
+      /**
+       * value of a selected item
+       * */
+      selectedItem:{
+        type:String,
+        notify:true
+      },
+      /**
+       * array of values of selected items
+       * */
+      selectedItems:{
+        type:Array,
+        value:[],
+        notify:true
+      },
+      /**
+       * override standard label for a dropdown with a custom, provided in `#label`
+       * */
+      forceCustomLabel:{
+        type: Boolean,
+        value:false
+      },
+      /**
+       * text for an empty option
+       * */
+      emptyOptionText:String
+    },
+
+    observers:['_computeList(data,_listType)'],
+
+    ready:function(){
+
+      var inlineLabel = this.$.wrapperLabel.textContent.trim;
+      if(inlineLabel.length>0 && !this.label){this.label=inlineLabel;}
+
+      var source = this.getContentChildren('#source')[0];
+      if(source && source.children.length>0){
+        if(source.querySelector('input')){ // we deal with checkbox or radio
+          this._stripInputData(source);
+        } else if (source.querySelector('select')){ // we deal with a dropdown
+          this._stripDropdownData(source,this.emptyOptionText);
+        }
+      }
+      if(this.forceCustomLabel){
+        this._computeLabel(this.label);
+      }
+    },
+    /**
+     * Gets data from checkboxes/radios
+     * @param {HTMLElement} source is distributed content from light DOM
+     * */
+    _stripInputData:function(source){
+      this._setData([].slice.call(source.querySelectorAll('input')).map(function(input){
+        return {
+          label: source.querySelector('label[for="'+input.id+'"]').textContent.trim(),
+          value: input.value,
+          checked: input.checked
+        }
+      }));
+      var type = source.querySelector('input').type;
+      var checked = this.data.filter(function(item){return item.checked}).map(function(item){return item.value});
+      switch(type){
+        case 'checkbox': this.selectedItems = checked; break;
+        case 'radio': this.selectedItem = checked[0]; break;
+      }
+      this._listType = type;
+    },
+    /**
+     * Gets data from dropdowns
+     * @param {HTMLElement} source is distributed content from light DOM
+     * @param {String} empty = `emptyOptionText`
+     * */
+    _stripDropdownData:function(source,empty){
+      var select = source.querySelector('select');
+      this._setData([].slice.call(select.children).map(function(option){
+        return { label: (option.textContent.trim().length===0 && empty? empty : option.textContent.trim()), value: option.value,selected: option.selected}
+      }));
+      this.multi = select.multiple;
+      var selected = this.data.filter(function(item){return item.selected}).map(function(item){return item.value});
+      if(this.multi){this.selectedItems = selected;} else { this.selectedItem = selected[0]; }
+      this._listType = 'dropdown';
+    },
+    /**
+     * Applies templates based on `_listType`
+     * @param {Array} data = `data`
+     * @param {String} type = `_listType`
+     * */
+    _computeList:function(data,type){
+      this.templatize(this.$[type]);
+      var instance = this.stamp({});
+      instance.data = data;
+      var el = Polymer.dom(instance.root).firstElementChild;
+      Polymer.dom(this.root).appendChild(instance.root);
+      switch(type){
+        case 'checkbox': this._computeLabel(this.label); el.addEventListener('change',function(e){this._reflectToCheckbox(e)}.bind(this));break;
+        case 'radio':    this._computeLabel(this.label); el.addEventListener('iron-select',function(e){this._reflectToRadio(e)}.bind(this));break;
+        case 'dropdown': el.addEventListener('iron-select',function(e){this._reflectToDropdown(e)}.bind(this));
+          el.addEventListener('iron-deselect',function(e){this._reflectToDropdown(e)}.bind(this));break;
+      }
+    },
+    /**
+     * Reflect selected values to native Reportal dropdowns
+     * */
+    _reflectToDropdown:function(e){
+      var select = Polymer.dom(this).querySelector('select');
+      if(!this.multi && ((select.selectedIndex>-1 && e.detail.item.value!==select.options[select.selectedIndex].value) || select.selectedIndex===-1) && e.type==='iron-select'){
+        this.selectedItem = select.value = e.detail.item.getAttribute('value');
+        if(typeof select.onchange === 'function'){eval(select.getAttribute('onchange'));}
+      } else if(this.multi){
+        this.selectedItems = this.$$('r-dropdown').selectedItems.map(function(item){return item.value;});
+        var el = Polymer.dom(this).querySelector('option[value="'+e.detail.item.getAttribute('value')+'"]');
+        if(e.detail.item.hasAttribute('selected')!==el.selected){
+          el.selected=!el.selected;
+          if(typeof select.onchange === 'function'){eval(select.getAttribute('onchange'));}
+        }
+      }
+    },
+    /**
+     * Reflect selected values to native Reportal checkboxes
+     * */
+    _reflectToCheckbox:function(e){
+      if(this._listType==='checkbox'){
+        var hostInput = Polymer.dom(this).querySelector('input[value="'+e.target.value+'"]');
+        if(hostInput.checked){
+          hostInput.checked = false;
+          var idx = this.selectedItems.indexOf(e.target.value);
+          if(idx> -1){this.splice('selectedItems',idx,1);}
+        } else {
+          hostInput.checked = true;
+          this.push('selectedItems',e.target.value);
+        }
+        if(typeof hostInput.onclick === 'function'){eval(hostInput.getAttribute('onclick'))}
+      }
+    },
+    /**
+     * Reflect selected values to native Reportal radios
+     * */
+    _reflectToRadio:function(e){
+      if(this._listType==='radio'){
+        this.$$('paper-radio-group').setAttribute('selected',e.detail.item.value);
+        var hostInput = this.querySelector('input[value="'+e.detail.item.value+'"]');
+        hostInput.checked = true;
+        if(typeof hostInput.onclick === 'function'){eval(hostInput.getAttribute('onclick'))}
+        this.selectedItem = e.detail.item.value;
+      }
+    },
+    /**
+     * Computes custom label
+     * */
+    _computeLabel:function(labelText){
+      if(labelText && labelText.length>0){
+        this.$.wrapperLabel.textContent = labelText;
+      }
+      this.$.wrapperLabel.setAttribute('style','display:block');
+    }
+
+  });
+
+</script>
